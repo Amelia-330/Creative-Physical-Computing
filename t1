@@ -1,0 +1,58 @@
+#include <Servo.h>
+Servo myservo1;
+Servo myservo2;
+
+int timer = 0;// 计时器
+int remindTime = 100;//need equal to 5s，10s，30s
+int servoPin1 = 9;//need connect with pin~ 
+int servoPin2 = 10;//need connect with pin~
+int touchPin = 2;
+int tiltPin = 4;
+int buzzerPin = 3;
+boolean tiltState = 0;
+int val = 10;//servo rotation angle 10 degree
+int pressValue = 0;
+
+void setup() {
+  pinMode(touchPin, INPUT);//touch input
+  myservo1.attach(servoPin1);//servo output
+  myservo2.attach(servoPin2);//servo output
+  pinMode(tiltPin, INPUT); //tilt input
+  pinMode(buzzerPin, OUTPUT);//buzzer output
+
+}
+
+void loop() {
+  if ((analogRead(touchPin) >= pressValue) && (2 * remindTime > timer >= remindTime)) {
+    myservo1.write(val);   // if Touch sensor is HIGH, after 5s-10s， then servo 10 degree
+    myservo2.write(val);   // if Touch sensor is HIGH, after 5s-10s， then servo 10 degree
+    timer=timer+1;
+  }
+  else if ((analogRead(touchPin) >= pressValue) && (6 * remindTime > timer >= 2 * remindTime)) {
+    myservo1.write(2 * val); // if Touch sensor is HIGH, after 10s-30s， then servo 20 degree
+    myservo2.write(2 * val); // if Touch sensor is HIGH, after 10s-30s， then servo 20 degree
+    timer++;
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////触摸传感器启动30秒后，伺服器带动盘子倾斜最大角度
+  else if ((analogRead(touchPin) >= pressValue) && (timer >= 6 * remindTime)) {
+    myservo1.write(9 * val); // if Touch sensor is HIGH, after 30s， then servo rotate degree
+    myservo2.write(9 * val); // if Touch sensor is HIGH, after 30s， then servo rotate degree
+    tiltState = digitalRead(tiltPin);
+    if (tiltState == HIGH)
+    {
+      digitalWrite(buzzerPin, HIGH);
+      delay(1000);
+    }
+  }
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  else if ((analogRead(touchPin) >= pressValue) && (timer < remindTime))  {
+    timer = timer + 1;
+  }
+  else if (analogRead(touchPin) < pressValue) {
+    myservo1.write(0);;  // if Touch sensor is LOW, then servo go back
+    myservo2.write(0);;  // if Touch sensor is LOW, then servo go back
+
+    delay(15);
+
+  }
+}
